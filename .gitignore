@@ -1,0 +1,15 @@
+# ⚠ 含所有機台 API Token，絕不進版控
+# clone 後請用 tools/gen_machines.py 產生，或複製 machines.h.example 手動填
+SmartSwitch-D1Mini/machines.h
+tools/machines.tsv
+
+# 編譯產物
+build/
+*.bin
+*.elf
+*.hex
+
+# 編輯器
+.vscode/
+.idea/
+*.swp

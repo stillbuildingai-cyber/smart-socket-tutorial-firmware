@@ -1,0 +1,14 @@
+# machines.h 的來源清單 —— 複製成 machines.tsv 再填入實際 Token
+#
+# 用 Tab 分隔，四欄：序號 / API Token / 備註 / 環境索引
+# 環境索引：0 = 教學後台   -1 = 不指定
+#
+# 產生韌體清單：
+#     python gen_machines.py machines.tsv > ../SmartSwitch-D1Mini/machines.h
+#
+# 只有一顆插座的話不需要這支工具，直接複製 machines.h.example 成 machines.h 就好，
+# 這個 TSV 流程是給接了多顆插座、想要在配網頁面用下拉選單切換的人用的。
+#
+# ⚠ 填好 Token 的 machines.tsv 不要提交進版控。
+
+SW-DEMO-001	tutorial-demo-token	教學示範插座	0

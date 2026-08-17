@@ -1,0 +1,26 @@
+#pragma once
+
+// ============================================================
+//  機台預設清單 —— 範本檔（複製成 machines.h 後填入實際 Token）
+// ============================================================
+//
+//  教學後台內建了一台示範機台，序號跟 Token 是固定的：
+//      序號:  SW-DEMO-001
+//      Token: tutorial-demo-token
+//
+//  「環境索引」對應 environments.h 的 ENV_PRESETS[] 順序（0 起算）：
+//      0 = 教學後台
+
+struct MachinePreset {
+  const char* serial;
+  const char* token;
+  const char* note;
+  int         env;      // ENV_PRESETS 的索引，-1 = 不指定
+};
+
+static const MachinePreset MACHINE_PRESETS[] = {
+  { "SW-DEMO-001", "tutorial-demo-token", "教學示範插座", 0 },
+};
+
+static const size_t MACHINE_PRESET_COUNT =
+    sizeof(MACHINE_PRESETS) / sizeof(MACHINE_PRESETS[0]);
