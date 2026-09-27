@@ -58,3 +58,17 @@
 #define MQTT_RETRY_INTERVAL_MS   5000UL   // MQTT 斷線重連間隔
 #define MQTT_KEEPALIVE_SEC          30    // Broker 45 秒內沒收到就觸發 LWT
 #define BUTTON_HOLD_RESET_MS     5000UL   // 外接鍵長按幾毫秒算「清除設定」
+
+// ---- 用電量分析（選配）----
+// 這是選配功能：只有真的加裝了 PZEM-004T v3.0 電力監測模組才需要打開。
+// 沒有這顆模組的話，保持 false，其餘程式碼會整段跳過，不影響原本功能。
+// 需要額外安裝函式庫：PZEM004Tv30（作者 mandulaj），透過 Library Manager 搜尋安裝即可。
+//
+// 接線：PZEM-004T 的 TX/RX 接到下面兩支腳位（用 SoftwareSerial 模擬序列埠），
+//   PZEM TX → PIN_PZEM_RX
+//   PZEM RX → PIN_PZEM_TX
+// D2(GPIO4)、D6(GPIO12) 是安全的自由腳位，不影響開機模式，跟繼電器/LED 也不衝突。
+#define ENABLE_POWER_MONITORING false
+#define PIN_PZEM_RX  D2   // GPIO4  ← 接 PZEM 的 TX
+#define PIN_PZEM_TX  D6   // GPIO12 → 接 PZEM 的 RX
+#define POWER_REPORT_INTERVAL_MS 60000UL   // 用電量回報週期，跟心跳同頻率即可

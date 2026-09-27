@@ -34,6 +34,14 @@
 #include "environments.h"   // 先載入環境，machines.h 的 env 索引指向這裡
 #include "machines.h"
 
+#if ENABLE_POWER_MONITORING
+#include <SoftwareSerial.h>
+#include <PZEM004Tv30.h>
+SoftwareSerial pzemSerial(PIN_PZEM_RX, PIN_PZEM_TX);
+PZEM004Tv30 pzem(pzemSerial);
+uint32_t lastPowerReportAt = 0;
+#endif
+
 // ============================================================
 //  全域狀態
 // ============================================================
@@ -66,7 +74,7 @@ bool     ledState         = false;
 String   apSsid;
 
 // MQTT topic（連線前組好，避免每次重組字串）
-String topicHeartbeat, topicStatus, topicEvent, topicCommand, topicAck;
+String topicHeartbeat, topicStatus, topicEvent, topicCommand, topicAck, topicPowerUsage;
 
 const char* CONFIG_PATH = "/config.json";
 
@@ -533,6 +541,30 @@ void publishHeartbeat() {
   Serial.printf("[MQTT] heartbeat -> %s\n", out.c_str());
 }
 
+#if ENABLE_POWER_MONITORING
+void publishPowerUsage() {
+  if (!mqtt.connected()) return;
+
+  float watt = pzem.power();
+  float kwhTotal = pzem.energy();
+
+  // PZEM 讀取失敗時，power()/energy() 會回傳 NAN，這種情況直接跳過這次回報，
+  // 不要把 NAN 送上雲端污染資料（下一個週期會再試一次）。
+  if (isnan(watt) || isnan(kwhTotal)) {
+    Serial.println("[PZEM] read failed, skip this report");
+    return;
+  }
+
+  JsonDocument doc;
+  doc["watt"] = watt;
+  doc["kwh_total"] = kwhTotal;
+  String out;
+  serializeJson(doc, out);
+  mqtt.publish(topicPowerUsage.c_str(), out.c_str());
+  Serial.printf("[MQTT] power_usage -> %s\n", out.c_str());
+}
+#endif
+
 void publishStatus(const char* status) {
   if (!mqtt.connected()) return;
   String payload = String("{\"status\":\"") + status + "\"}";
@@ -643,7 +675,10 @@ bool connectMqtt() {
 }
 
 void buildTopics() {
-  topicHeartbeat = "machine/" + cfg.serialNo + "/heartbeat";
+  topicHeartbeat   = "machine/" + cfg.serialNo + "/heartbeat";
+#if ENABLE_POWER_MONITORING
+  topicPowerUsage  = "machine/" + cfg.serialNo + "/power_usage";
+#endif
   topicStatus    = "machine/" + cfg.serialNo + "/status";
   topicEvent     = "machine/" + cfg.serialNo + "/event";
   topicCommand   = "machine/" + cfg.serialNo + "/command";
@@ -785,6 +820,12 @@ void loop() {
       lastHeartbeatAt = millis();
       publishHeartbeat();
     }
+#if ENABLE_POWER_MONITORING
+    if (millis() - lastPowerReportAt >= POWER_REPORT_INTERVAL_MS) {
+      lastPowerReportAt = millis();
+      publishPowerUsage();
+    }
+#endif
   }
 
   yield();   // ESP8266 要定期讓出 CPU 餵看門狗
