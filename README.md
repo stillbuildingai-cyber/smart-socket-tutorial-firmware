@@ -202,6 +202,14 @@ python3 tools/mqtt_sim.py --host 192.168.1.100 --once
 
 ---
 
+## 9. 番外：這套架構不是只能管插座
+
+[`SmartCurtain-D1Mini`](./SmartCurtain-D1Mini) 是另一份獨立韌體，示範同一套後台骨架
+（Machine／MQTT／RemoteCommand）怎麼管理一種完全不同的裝置：智慧窗簾。
+重點不是插座或窗簾本身，是「裝置類型可以一直擴充，架構不用重寫」這個觀念。
+
+---
+
 ## 授權
 
 MIT License，供課程學員學習使用。
